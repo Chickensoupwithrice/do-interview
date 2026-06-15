@@ -20,12 +20,17 @@
 - Expand the word lists substantially to improve uniqueness at larger scale.
 - Consider adding an optional short numeric suffix or larger word pools to reduce collision probability.
 - Consider curated memorable alias generation rules if human readability becomes a product goal.
+- Revisit the generated alias namespace size; the current four-word setup is memorable but too small to age well without much larger word pools or a suffix strategy.
+- Add explicit tracking or alerting around alias collision rate if readable aliases remain the default.
 
 ## Redirect and analytics behavior
 
 - Revisit access-count updates so redirect latency and goroutine growth do not depend on per-request async writes.
 - Consider a bounded worker queue or batched counter flush strategy.
 - Add clearer metrics around cache hit rate and redirect throughput.
+- Avoid unbounded background goroutine fan-out on redirects; move toward bounded queues, batching, or periodic flushes.
+- Decide what accuracy guarantees `access_count` should provide and make the behavior explicit in code and docs.
+- Add logging or metrics for dropped/failed access-count updates.
 
 ## Testing
 
@@ -33,9 +38,14 @@
 - Add build/deployment tests for image architecture compatibility.
 - Add heavier concurrency/load tests around generated alias creation and redirect traffic.
 - Add tests for SQLite lock contention behavior under load.
+- Add tests for alias namespace exhaustion and collision-heavy generated alias behavior.
+- Add shutdown tests covering in-flight async count updates.
+- Add tests for oversized destination URLs and redirect-header behavior.
 
 ## Operations and docs
 
 - Add a ready-to-use raw-IP HTTP Caddy example to the docs.
 - Add a ready-to-use domain + HTTPS Caddy example to the docs.
 - Document recommended production environment variables and rollout steps more explicitly.
+- Add request logging, metrics, and better operational visibility beyond `healthz` and basic process logs.
+- Add observability around cache hit/miss rates, SQLite contention, goroutine growth, and redirect error rates.
