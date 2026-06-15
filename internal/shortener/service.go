@@ -2,12 +2,10 @@ package shortener
 
 import (
 	"context"
-	"crypto/rand"
 	"database/sql"
 	"errors"
 	"fmt"
 	"math"
-	"math/big"
 	"net/url"
 	"strings"
 	"sync"
@@ -26,8 +24,6 @@ var (
 	ErrInvalidBaseURL    = errors.New("invalid base url")
 	ErrInvalidDependency = errors.New("invalid dependency")
 )
-
-const generatedAliasLength = 8
 
 const maxTTLSeconds = int64(math.MaxInt64 / int64(time.Second))
 
@@ -108,7 +104,7 @@ func (s *Service) Create(ctx context.Context, input CreateInput) (Link, error) {
 	}
 
 	for range 10 {
-		alias, err := generateAlias(generatedAliasLength)
+		alias, err := generateAlias()
 		if err != nil {
 			return Link{}, fmt.Errorf("generate alias: %w", err)
 		}
@@ -240,19 +236,6 @@ func validateAlias(alias string) error {
 		return ErrInvalidAlias
 	}
 	return nil
-}
-
-func generateAlias(length int) (string, error) {
-	const alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	result := make([]byte, length)
-	for i := range result {
-		index, err := rand.Int(rand.Reader, big.NewInt(int64(len(alphabet))))
-		if err != nil {
-			return "", err
-		}
-		result[i] = alphabet[index.Int64()]
-	}
-	return string(result), nil
 }
 
 func isExpired(expiresAt *time.Time, now time.Time) bool {

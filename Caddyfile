@@ -1,0 +1,3 @@
+YOUR_DOMAIN {
+    reverse_proxy url-shortener:8080
+}

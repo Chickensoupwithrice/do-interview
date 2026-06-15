@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -173,6 +174,26 @@ func TestCreateRejectsReservedAlias(t *testing.T) {
 	})
 	if err != ErrInvalidAlias {
 		t.Fatalf("expected invalid alias, got %v", err)
+	}
+}
+
+func TestCreateGeneratesReadableAlias(t *testing.T) {
+	t.Parallel()
+
+	service := newTestService(t)
+	link, err := service.Create(context.Background(), CreateInput{URL: "https://example.com/a"})
+	if err != nil {
+		t.Fatalf("create: %v", err)
+	}
+
+	parts := strings.Split(link.Alias, "-")
+	if len(parts) != 4 {
+		t.Fatalf("expected 4 alias words, got %q", link.Alias)
+	}
+	for _, part := range parts {
+		if part == "" {
+			t.Fatalf("expected non-empty alias parts, got %q", link.Alias)
+		}
 	}
 }
 

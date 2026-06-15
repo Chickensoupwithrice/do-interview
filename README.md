@@ -1,6 +1,6 @@
 # URL Shortener
 
-Small Go URL shortener built for an interview exercise. It exposes a REST API for creating shortened URLs, supports custom aliases, handles alias collisions safely with SQLite uniqueness constraints, redirects short links, tracks access counts, caches hot redirects in memory, and enforces optional TTL expiration.
+Small Go URL shortener built for an interview exercise. It exposes a REST API for creating shortened URLs, supports custom aliases, generates readable four-word aliases by default, handles alias collisions safely with SQLite uniqueness constraints, redirects short links, tracks access counts, caches hot redirects in memory, and enforces optional TTL expiration.
 
 ## API
 
@@ -88,6 +88,8 @@ Or run both with:
 This repo includes:
 
 - `Dockerfile`
+- `compose.yaml`
+- `Caddyfile`
 - `.do/droplet.md`
 - `.github/workflows/ci.yml`
 
@@ -106,6 +108,14 @@ git push -u origin main
 ```
 
 Then follow `.do/droplet.md` on the target Droplet.
+
+If you prefer Compose on the Droplet, update `compose.yaml` and `Caddyfile`, then run:
+
+```bash
+mkdir -p data
+docker compose pull
+docker compose up -d
+```
 
 The first production hardening step after the interview would be moving persistence to a managed database and then reconsidering App Platform.
 
