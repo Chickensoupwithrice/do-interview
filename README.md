@@ -95,6 +95,13 @@ This repo includes:
 
 Schema changes are managed with `goose` migrations stored in `internal/store/migrations/`.
 
+On every push to `main`, GitHub Actions runs tests and publishes a multi-arch image to DigitalOcean Container Registry as:
+
+- `registry.digitalocean.com/do-interview/url-shortener:latest`
+- `registry.digitalocean.com/do-interview/url-shortener:<git-sha>`
+
+To enable image publishing, add the GitHub Actions secret `DIGITALOCEAN_ACCESS_TOKEN` with permission to push to the registry.
+
 For this SQLite-backed build, the simplest durable DO deployment is a single Droplet with a mounted host directory for `/app/data` and a small TLS reverse proxy in front.
 
 Why not App Platform? Its container filesystem is ephemeral, which would wipe SQLite data on restart or redeploy.
