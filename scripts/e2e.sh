@@ -3,10 +3,11 @@
 set -euo pipefail
 
 ROOT_DIR=$(dirname "$(dirname "$(realpath "$0")")")
-PORT=${PORT:-18080}
+PORT=${PORT:-38080}
 BASE_URL=${BASE_URL:-"http://127.0.0.1:${PORT}"}
 DB_PATH=$(mktemp "${TMPDIR:-/tmp}/url-shortener-e2e-XXXXXX.db")
 LOG_PATH=$(mktemp "${TMPDIR:-/tmp}/url-shortener-e2e-log-XXXXXX")
+ALIAS="docs-e2e-$(date +%s)"
 
 cleanup() {
   if [[ -n "${SERVER_PID:-}" ]] && kill -0 "${SERVER_PID}" 2>/dev/null; then
@@ -38,21 +39,21 @@ fi
 create_response=$(curl --silent --show-error --fail \
   -X POST "${BASE_URL}/api/urls" \
   -H 'Content-Type: application/json' \
-  -d '{"url":"https://example.com/docs","alias":"docs-e2e","ttl_seconds":60}')
+  -d "{\"url\":\"https://example.com/docs\",\"alias\":\"${ALIAS}\",\"ttl_seconds\":60}")
 
 short_url=$(printf '%s' "${create_response}" | jq -r '.short_url')
-if [[ "${short_url}" != "${BASE_URL}/docs-e2e" ]]; then
+if [[ "${short_url}" != "${BASE_URL}/${ALIAS}" ]]; then
   printf 'unexpected short_url: %s\n' "${short_url}" >&2
   exit 1
 fi
 
-redirect_location=$(curl --silent --output /dev/null --write-out '%{redirect_url}' "${BASE_URL}/docs-e2e")
+redirect_location=$(curl --silent --output /dev/null --write-out '%{redirect_url}' "${BASE_URL}/${ALIAS}")
 if [[ "${redirect_location}" != "https://example.com/docs" ]]; then
   printf 'unexpected redirect location: %s\n' "${redirect_location}" >&2
   exit 1
 fi
 
-metadata_response=$(curl --silent --show-error --fail "${BASE_URL}/api/urls/docs-e2e")
+metadata_response=$(curl --silent --show-error --fail "${BASE_URL}/api/urls/${ALIAS}")
 access_count=$(printf '%s' "${metadata_response}" | jq -r '.access_count')
 if [[ "${access_count}" != "1" ]]; then
   printf 'unexpected access_count: %s\n' "${access_count}" >&2
